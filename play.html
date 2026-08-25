@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+    <title>PolyVariants: Play</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" type="image/png" href="assets/images/icons/favicon.ico">
+</head>
+    
+<body class="fixed-layout">
+    <div id="top-bar-placeholder"></div>
+    <div class="play-layout">
+        <div class="left-panel">
+            <div class="variant-menu-wrapper">
+                <h2>Variants</h2>
+
+                <nav class="variant-tabs">
+                    <button class="tab-button active" data-tab="classic">Classic</button>
+                    <button class="tab-button" data-tab="popular">Popular</button>
+                    <button class="tab-button" data-tab="recent">Recent</button>
+                    <button class="tab-button" data-tab="custom">Custom</button>
+                </nav>
+
+                <div id="classic-list" class="tab-content-folder active-folder"></div>
+                <div id="popular-list" class="tab-content-folder"></div>
+                <div id="recent-list" class="tab-content-folder"></div>
+                <div id="custom-list" class="tab-content-folder"></div>
+            </div>
+
+            <div id="game-settings">
+                <h2>Game Settings</h2>
+                
+                <button class="back-btn" onclick="goToMenu()">
+                ← Back to Variants
+                </button>
+
+                <div class="settings-group" style="text-align: left; margin-bottom: 20px;">
+                    <p class="settings-label">Time Control</p>
+                    <div class="time-control"></div>
+                </div>
+
+                <div class="settings-group" style="text-align: left; margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #aaa;">Visibility</label>
+                    <button id="toggle-visibility" class="preview-btn" style="font-size: 16px; padding: 10px; width: 100%;">
+                        Public
+                    </button>
+                </div>
+                
+                <button id="start-game-btn" class="preview-btn" style="font-size: 22px; padding: 15px; margin-top: 10px;">
+                    ▶ Start Game
+                </button>
+            </div>
+
+            <div class="analysis-tools-wrapper">
+                <div class="analysis-header-row">
+                    <button id="back-to-menu-btn" class="back-btn" onclick="goToMenu()">
+                        ← Back
+                    </button>
+
+                    <h2>Analysis</h2>
+                </div>
+                
+                <div class="analysis-tools-container">
+                    <div class="moves-list">
+                        <div class="move-log-header">
+                            <span class="col-num">#</span>
+                            <span class="col-move">&nbsp;&nbsp;R</span>
+                            <span class="col-move">&nbsp;&nbsp;B</span>
+                            <span class="col-move">&nbsp;&nbsp;Y</span>
+                            <span class="col-move">&nbsp;&nbsp;G</span>
+                        </div>
+                        
+                        <div class="move-log-body"></div>
+                    </div>
+
+                    <div class="resizer-v" id="analysis-resizer"></div>
+
+                    <div class="analysis-tools">
+                        <p>idk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+        <div class="resizer-h" id="panel-resizer"></div>
+
+        <div class="right-panel">
+            <div class="preview-board-zone">
+                <div class="preview-board"></div>
+            </div>
+
+            <div class="preview-variant-zone">
+                <div class="preview-information">
+                    <h2></h2>
+                    <p class="preview-description"></p>
+                    <p class="variant-author"></p>
+                </div>
+
+                <div class="preview-buttons"> 
+                    <button id="btn-play" class="preview-btn" onclick="openPlayMode()">
+                        <img src="assets/images/icons/buttons/play.svg" class="btn-icon" alt="">
+                        <span>Play</span>
+                    </button>
+                    <button id="btn-analysis" class="preview-btn" onclick="openPlayAnalysis()">
+                        <img src="assets/images/icons/buttons/analysis.svg" class="btn-icon" alt="">
+                        <span>Analysis</span>
+                    </button>
+                    <button id="btn-edit" class="preview-btn">
+                        <img src="assets/images/icons/buttons/edit.svg" class="btn-icon" alt="">
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script src="js/debugger.js" type="module"></script>
+    <script src="js/top-bar.js" type="module" defer></script>
+    <script src="js/tabs.js" type="module" defer></script>
+    <script src="js/board-engine.js" type="module" defer></script>
+    <script src="js/preview.js" type="module" defer></script>
+    <script src="js/game-ui.js" type="module" defer></script>
+    <script src="js/router.js" type="module"></script>
+    <script src="js/resizer.js" type="module"></script>
+</body>

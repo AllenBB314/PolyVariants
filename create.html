@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+    <title>PolyVariants: Create</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" type="image/png" href="assets/images/icons/favicon.ico">
+</head>
+    
+<body class="fixed-layout">
+    <div id="top-bar-placeholder"></div>
+    
+    <div class="create-layout">
+        <div class="create-ui">
+            <h2>Create</h2>
+
+            <div class="create-selection">
+                <div class="create-option" onclick="openCreatePiece()">
+                    <img src="assets/images/icons/pieces/white/P.svg" alt="">
+                    <p>Create A Piece</p>
+                </div>
+                <div class="create-option" onclick="openCreateRule()">
+                    <img src="assets/images/scratchblocks/create.svg" alt="">
+                    <p>Create A Rule</p>
+                </div>
+                <div class="create-option" onclick="openCreateVariant()">
+                    <p>Create A Variant</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="create-piece-page">
+        <div class="piece-info">
+            <h2>Info</h2>
+            <div class="piece-info-placeholder"></div>            
+        </div>
+        <div class="piece-svg">
+            <h2>Image</h2>
+            <div id="piece-svg-option-paste" class="piece-svg-option"></div>
+            <div id="piece-svg-option-upload" class="piece-svg-option"></div>
+            <div id="piece-svg-option-editor" class="piece-svg-option"></div>
+            <div class="piece-svg-full-editor">
+                <div class="piece-svg-items">
+                    <div class="piece-svg-editor-options">
+                        <img id="piece-svg-editor-exit" src="assets/images/icons/exit-left.svg">
+                    </div>
+                    <div class="piece-svg-tools"></div>
+                </div>
+                <div class="piece-svg-editor"></div>
+            </div>
+            
+        </div>
+        <div class="piece-movement">
+            <h2>Movement</h2>
+        </div>
+    </div>
+
+    <div class="create-rule-page">
+        <div class="block-panel">
+            <div class="category-panel"></div>
+            <div class="blocks"></div>
+        </div>
+        <div class="workspace"></div>
+        <div class="rule-text-editor"></div>
+    </div>
+
+    <div class="create-variant-page">
+        <div class="variant-editor"></div>
+        <div class="preview-board-container">
+            <div class="preview-board"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/debugger.js"></script>
+    <script src="js/top-bar.js" defer></script>
+    <script src="js/tabs.js" defer></script>
+    <script src="js/board-engine.js" type="module" defer></script>
+    <script src="js/piece.js" defer></script>
+    <script src="js/scratchblocks/blocks.js" defer></script>
+    <script src="js/router.js"></script>
+    <script src="js/resizer.js"></script>
+</body>

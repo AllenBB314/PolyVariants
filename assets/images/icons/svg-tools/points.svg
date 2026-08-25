@@ -1,0 +1,12 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+    <defs>
+        <style>
+            .w {fill: none; stroke: #ffffff; stroke-width: 5;}
+        </style>
+    </defs>
+
+    <circle class="w" r="7.5" cx="25" cy="30"/>
+    <circle class="w" r="7.5" cx="50" cy="70"/>
+    <circle class="w" r="7.5" cx="75" cy="45"/>
+    <path class="w" d="M 28.98 36.37 46.02 63.63M 54.51 65.49 70.49 49.51M 67.73 42.82 32.27 32.18"/>
+</svg>

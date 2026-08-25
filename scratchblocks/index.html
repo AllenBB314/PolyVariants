@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag & Drop Editor</title>
+    
+    <script src="blockly.js"></script>
+    <script src="editor.js" defer></script>
+
+    <style>
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: sans-serif; overflow: hidden; 
+        }
+        header { 
+            background-color: #333; color: white; 
+            padding: 15px; text-align: center; font-weight: bold; 
+        }
+        #blocklyDiv { 
+            height: calc(100vh - 50px); width: 100%; 
+        }
+    </style>
+</head>
+<body>
+
+    <header>Drag-and-Drop Editor</header>
+
+    <div id="blocklyDiv"></div>
+
+    <xml id="toolbox" style="display: none">
+        
+        <category name="Events" colour="#ffbf00">
+            <block type="event_any_time"></block>
+            <block type="event_start"></block>
+            <block type="event_clicked"></block>
+            <block type="event_turn"></block>
+            <block type="event_turn_ended"></block>
+        </category>
+
+        <category name="Get" colour="#9966ff">
+            <block type="g_move"></block>
+            <block type="g_board"></block>
+            <block type="g_col"></block>
+            <block type="g_cols"></block>
+            <block type="g_dim"></block>
+        </category>
+
+        <category name="Actions" colour="#ed4242">
+            <block type="a_win"></block>
+            <block type="a_lose"></block>
+            <block type="a_turn"></block>
+            <block type="a_replace"></block>
+            <block type="a_delete"></block>
+        </category>
+
+        <category name="Operators" colour="#59c059">
+            <block type="o_add"></block>
+            <block type="o_sub"></block>
+            <block type="o_abs"></block>
+        </category>
+
+        <category name="Arrays" colour="#059862">
+            <block type="array_create_1d"></block>
+            <block type="array_create_rectangular"></block>
+            <block type="array_get"></block>
+        </category>
+
+        <category name="Logic" colour="#0fbd8c">
+            <block type="l_and"></block>
+            <block type="l_equals"></block>
+        </category>
+
+    </xml>
+
+</body>
+</html>

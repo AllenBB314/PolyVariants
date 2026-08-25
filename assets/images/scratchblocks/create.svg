@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 48.91640625 48.91640625">
+    <defs>
+        <style>
+            .label{fill:#fff;font:8.1pt Helvetica Neue,Helvetica,sans-serif}
+            .looks{fill:#96f;stroke:#774dcb}
+        </style>
+    </defs>
+    <rect fill="none" width="48.91640625" height="48.91640625"/>
+    <g transform="translate(0,4.883203125)">
+        <path class="looks" d="M1.35 3.375a2.7 2.7 90 012.7-2.7h5.4c1.35 0 2.025.675 2.7 1.35l2.7 2.7c.675.675 1.35 1.35 2.7 1.35h8.1c1.35 0 2.025-.675 2.7-1.35l2.7-2.7c.675-.675 1.35-1.35 2.7-1.35H44.8664a2.7 2.7 90 012.7 2.7v27a2.7 2.7 90 01-2.7 2.7H33.75c-1.35 0-2.025.675-2.7 1.35l-2.7 2.7c-.675.675-1.35 1.35-2.7 1.35h-8.1c-1.35 0-2.025-.675-2.7-1.35l-2.7-2.7c-.675-.675-1.35-1.35-2.7-1.35H4.05a2.7 2.7 90 01-2.7-2.7Z"/>
+        <text class="label " x="6.75" y="20.9925">
+            Create!
+        </text>
+    </g>
+</svg>

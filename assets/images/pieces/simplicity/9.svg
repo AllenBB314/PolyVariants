@@ -1,0 +1,13 @@
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+    <defs> 
+        <style> 
+            .custom{fill:#f96800;stroke:#0e0e0e;stroke-width:3}
+        </style>
+    </defs>
+    <rect fill="none" width="100" height="100"/>
+    <path class="custom" d="M40 75L45 40H40L30 60H20L30 20L60 15L75 40L70 75Z"/>
+    <path class="custom" d="M50 75L52.5 57.5H50L45 67.5H40L45 47.5L60 45L67.5 57.5L65 75Z"/>
+    <path class="custom" d="M15 75H85V90H15Z"/>
+    <circle fill="#0e0e0e" r="3" cx="35" cy="32.5"/>
+    <circle fill="#0e0e0e" r="1.5" cx="47.5" cy="53.75"/>
+</svg>
