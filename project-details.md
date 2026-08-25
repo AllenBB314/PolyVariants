@@ -31,7 +31,7 @@ Credits: chess.com (idea), Gemini (small amount of code + debug), VS Code, Copil
     0.09: 2026/8/9 : New "Create Page", with rule editor ui
     0.10: 2026/8/10: Added some blocks to Create Rule page (uses JSON)
     0.11: 2026/8/12: Added some blocks, more block types, fixed viewBox crop, can drag and drop
-    0.12: 2026/8/??: Fixed board square gap; Slightly changed ui; Added create pieec and varaint (not finished); Used Supabase, can start games (not finished)
+    0.12: 2026/8/26: Slightly changed ui; Can use Game Settings; Can use custom rules (not finished); Added create piece and varaint (not finished); Used Supabase, can start games (not finished)
 
 ## Notes:
 ### 1. PGN format:
