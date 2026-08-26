@@ -1,6 +1,6 @@
 # PolyVariants
 By @AllenBB314  
-Credits: chess.com (idea), Gemini (small amount of code + debug), VS Code, Copilot
+Credits: chess.com (idea), Gemini (small amount of code + debug), VS Code, Copilot, DeepSeek
 
   #### Goals:
   - To create a website for variant lovers to play
@@ -32,6 +32,7 @@ Credits: chess.com (idea), Gemini (small amount of code + debug), VS Code, Copil
     0.10: 2026/8/10: Added some blocks to Create Rule page (uses JSON)
     0.11: 2026/8/12: Added some blocks, more block types, fixed viewBox crop, can drag and drop
     0.12: 2026/8/26: Slightly changed ui; Can use Game Settings; Can use custom rules (not finished); Added create piece and varaint (not finished); Used Supabase, can start games (not finished)
+    0.13: 2026/8/26: Fixed some ui bugs, and especially board gaps; Planned rule commands as well
 
 ## Notes:
 ### 1. PGN format:
@@ -106,187 +107,108 @@ Credits: chess.com (idea), Gemini (small amount of code + debug), VS Code, Copil
   // In all 8 directions, MOVE and CAPTURE 2 square up and 1 square right, but can be blocked by something 1 square in front, infinitely many times, but can be blocked
 
 ### 3. Rule format:
+  #### 3.1 Data Types
+
+  | Type | Description | Example |
+  | :--- | :--- | :--- |
+  | **`Num`** | Number | `5`, `3.14` |
+  | **`Str`** | String (always in single quotes) | `'r'`, `'P'` |
+  | **`Bln`** | Boolean | `true`, `false` |
+  | **`Pos`** | Position = `[col, row]` (0-indexed) | `[0, 0]` (top-left) |
+  | **`Arr`** | List of anything | `['a1','b2']` |
+
+  ---
+
+  #### 3.2 Events (`~`)
+
+  | Event | Trigger | Available Getters |
+  | :--- | :--- | :--- |
+  | **`~Start`** | Board is loaded (game begins) | `gBoard`, `gDim`, `gCols` |
+  | **`~Turn`** | It becomes a player's turn | `gCol`, `gColIdx`, `gMove` |
+  | **`~Clicked`** | A user clicks a square | `gClicked` (Pos) |
+  | **`~MovedPiece`** | After `aMove` executes | `gMovedPiece`, `gPieceFrom`, `gPieceTo`, `gPieceAction` |
+
+  ---
+
+  #### 3.3 Get (`g`)
+
+  | Command | Inputs | Output | Description |
+  | :--- | :--- | :--- | :--- |
+  | `gBoard` | None | `ArrArrStr` | 2D board array |
+  | `gDim` | None | `[cols, rows]` | Board dimensions |
+  | `gMove` | None | `Num` | Current turn number |
+  | **`gCol`** | None | `Str` | Whose turn it is (`'r'`, `'b'`, etc.) |
+  | **`gColIdx`** | None | `Num` | Numeric index of current color (0, 1, 2, 3) |
+  | `gCols` | None | `ArrStr` | Order of colors (e.g., `['r','b']`) |
+  | `gPieceAt(Pos)` | `Pos` | `Str` or `null` | Raw piece string (e.g., `"r:P"`) |
+  | `gPieceColor(Pos)` | `Pos` | `Str` or `null` | Color of piece at `Pos` |
+  | `gPieceLetter(Pos)` | `Pos` | `Str` or `null` | Letter of piece at `Pos` |
+  | **`gMoves(Pos)`** | `Pos` | `ArrPos` | **Raw legal destinations** (uses movement codes, NO turn/check filtering) |
+  | **`gAttackers(Pos, Color)`** | `Pos`, `Str` | `ArrPos` | Positions of `Color` pieces attacking `Pos` |
+  | `gFindPieces(Letter, Color)` | `Str`, `Str` | `ArrPos` | Find all positions of a piece type |
+  | `gConfig(Key)` | `Str` | `Any` | Read from `[RuleConfig ...]` |
+  | `gVar(Key)` | `Str` | `Any` | Read from `[Variables ...]` |
+  | `gMovedPiece` | None | `Str` | Letter of last moved piece |
+  | `gPieceFrom` | None | `Pos` | Where the piece moved from |
+  | `gPieceTo` | None | `Pos` | Where the piece moved to |
+  | `gPieceAction` | None | `Str` | `'move'`, `'capture'`, or `'enpassant'` |
+  | `gCol(Pos)` / `gRow(Pos)` | `Pos` | `Num` | Extracts the column or row number from a `Pos` |
+
+  ---
+
+  #### 3.4 Actions (`a`)
+
+  | Command | Inputs | Description |
+  | :--- | :--- | :--- |
+  | **`aMove(From, To)`** | `Pos`, `Pos` | Move piece (triggers `~MovedPiece` automatically) |
+  | `aReplace(Pos, PieceStr)` | `Pos`, `Str` | Set square to a piece (e.g., `'r:Q'`) |
+  | `aDelete(Pos)` | `Pos` | Remove piece at `Pos` |
+  | `aWin(Color)` | `Str` | End game with `Color` as winner |
+  | `aLose(Color)` | `Str` | End game with `Color` as loser |
+  | `aDraw()` | None | End game in a draw |
+  | `aTurn(Color)` | `Str` | Explicitly set whose turn it is |
+  | `aTurnIdx(Num)` | `Num` | Explicitly set turn by index (e.g., `0` = first color in `gCols`) |
+  | `$varSet(Key, Value)` | `Str`, `Any` | Save to `[Variables ...]` (persists in PGN) |
+
+  ---
+
+  #### 3.5 Logic (`l`) & Operators (`o`)
+
+  | Category | Command | Inputs | Output | Description |
+  | :--- | :--- | :--- | :--- | :--- |
+  | **Logic** | `lAnd(b1,b2)` | `Bln`, `Bln` | `Bln` | AND |
+  | | `lOr(b1,b2)` | `Bln`, `Bln` | `Bln` | OR |
+  | | `lNot(b)` | `Bln` | `Bln` | NOT |
+  | | `lEq(v1,v2)` | `Any`, `Any` | `Bln` | Equal? |
+  | | `lGt(n1,n2)` | `Num`, `Num` | `Bln` | Greater than? |
+  | | `lLt(n1,n2)` | `Num`, `Num` | `Bln` | Less than? |
+  | **Operators** | `oAdd(n1,n2)` | `Num`, `Num` | `Num` | Addition |
+  | | `oSub(n1,n2)` | `Num`, `Num` | `Num` | Subtraction |
+  | | `oMul(n1,n2)` | `Num`, `Num` | `Num` | Multiplication |
+  | | `oDiv(n1,n2)` | `Num`, `Num` | `Num` | Division |
+  | | `oRandI(n1,n2)` | `Num`, `Num` | `Num` | Random integer between n1 and n2 |
+
+  ---
+
+  #### 3.6 Conditions
+
+  | Command | Syntax | Description |
+  | :--- | :--- | :--- |
+  | **Condition** | `ci(condition){ ... }` | If condition is true, run block |
+  | | `ce{ ... }` | Else block (must follow `ci` or `cei`) |
+  | | `cei(condition){ ... }` | Else-if block |
+  | **Repeat** | `r(n){ ... }` | Repeat block `n` times |
+
+  ---
+
+  #### For Example:
+
   ```
-  v: variable
-  n: number
-  s: string
-  b: boolean
-  a: array
-  c: color (according to 'gcols')
-  p: position ([col,row])
-  d: direction (0/1/2/3, turn CW 90 deg starting from up)
+  ~Start {
+
+  }
   ```
 
-  #### General
-  ```
-  - () : Input
-  - [] : Array
-  - {} : Code
-  - ~  : Event
-  - g  : Get
-  - a  : Action
-  - r  : Repeat
-  - o  : Operator
-  - l  : Logic
-  - c  : Conditions
-  - $  : Variables
-  - @  : User
-  ```
-
-  #### Events
-  ```
-  - ~anyTime          : Any moment
-  - ~start            : When the game starts
-  - ~end              : When the game ends
-  - ~clicked          : When any square is clicked
-  - ~turn             : When it is any player's turn
-  - ~turnEnded        : When any player's turn ends
-  - ~movedPiece       : When a piece moves
-  - ~capturedPiece    : When a piece captures
-  - ~moveCapturePiece : When a piece moves or captures
-  ```
-  
-  #### Get
-  ```
-  * Types: (Can stack, like ArrArrStr)
-  * 1. Num : A number (like 4)
-  * 2. Str : A string (like 'Q')
-  * 3. Bln : A boolean (like true, false)
-  * 4. Arr : An array (like ['H','I'])
-  * 5. Col : Item # of 'gcols', 0 if none, is Num (like 2)
-  * 6. Seq : Array of items according to 'gcols', is Arr
-  * 7. Pos : Position of an object in the board, counted from the top left corner, col by row, starting from 0, is ArrNum (like [1,3])
-  ```
-  ```
-  - gmove (Num)            : Move number (r -> y -> y -> [r] then it is move 4)
-  - gboard (ArrArrStr)     : Current board (like [[y:P,y:B,y:P,y:N],['','','',''],['','','',''],[r:K,'',r:P,r:Q]])
-  - gcol (Col)             : Color of the player that has to move
-  - gcols (SeqStr)         : Order of colors (like ['r','y'])
-  - gdead (SeqBln)         : If players are dead (like [false,false])
-  - gtimeControl (Str)     : Time control
-  - gtime (SeqNum)         : Time in milliseconds (like [900000,180000] , r has 15 mins , y has 3 mins)
-  - gdim (ArrNum)          : Dimension, cols by rows (like [4,4])
-  - gpieceNum (SeqNum)     : Number of pieces each player has (like [3,4] , r has 3 pieces , y has 4 pieces)
-  - gpieceTypeNum (SeqNum) : Number of piece types each player has (like [3,3] , r has 3 types , y has 3 types)
-  - gpieceNumAll (Num)     : Total number of pieces left (excluding dead pieces) (like 7)
-  - gpieceTypeNumAll (Num) : Total number of piece types (like 5)
-  - gpieces (SeqArrStr)    : Pieces each player has (like [['K','P','Q'],['P','B','P','N']])
-  - gpieceTypes (SeqArrStr): Piece types each player has (like [['K','P','Q'],['P','B','N']])
-  - gdeadPiecesNum (Num)   : Number of dead pieces on the board (non player pieces) (like 0)
-  - gclicked (Pos)         : The clicked square (like [0,2])
-  - gpieceFrom (Pos)       : The old square of the (last) moved piece, col and row (like [0,3])
-  - gpieceTo (Pos)         : The new square of the (last) moved piece, col by row (like [1,3])
-  - gmovedCol (Col)        : The color of the (last) moved piece (0 if none, 1 if red (first color of gcols))
-  - gmovedPiece (Str)      : The piece name of the (last) moved piece ('' if none, or like 'Q')
-  - gpieceDirs (SeqNum)    : The directions of the colors (like [0,2] , 0 is up , 1 is right , 2 is down , 3 is left)
-  - gpieceAction (Str)     : The action type of the (last) moved piece (like 'm' or 'c' or 'o' or 'e', see piece movement code)
-  - groyalPos (SeqPos)     : The position of the royals 
-  - gplayerNames (SeqStr)  : Player names (like ['AllenBB314','sparrow'] , r is AllenBB314 , y is sparrow)
-  - gplayerRatings (SeqNum): Player ratings (like [1000,4] , r is 1000 rating , y is 4 rating)
-  - ginCheck (SeqBln)      : If players are in check, checkmate doesn't count (like [false,false])
-  - ginCheckmate (SeqBln)  : If players are in checkmate (like [false,false])
-  - ggameEnded (Bln)       : If the game ended (like false)
-  - gdisconnected (SeqBln) : If players are disconnected (like [false,true])
-  ```
-
-  #### Actions
-  ```
-  - awin(c)              : Make 'c' win
-  - alose(c)             : Make 'c' lose
-  - aturn(c)             : Set current turn to 'c'
-  - acode(s1,s2)         : Set the code of 's1' to 's2'
-  - asetAt(p,s)          : Set the code of (only) the piece on 'p' to 's'
-  - arevertCode(s)       : Change the code of 's' back to normal
-  - aaddLegal(p1,p2)     : Add 'p1' as a legal move of piece on 'p2'
-  - adelLegal(p1,p2)     : Delete (all) matching legal moves on 'p1' of piece on 'p2'
-  - aclrLegal(p)         : Delete all legal moves of piece on 'p'
-  - areplace(p,s)        : Replace the square 'p' with piece 's'
-  - asetCol(p,c)         : Set the color of the piece on 'p' as 'c'
-  - aswap(p1,p2)         : Swap 'p1' and 'p2'
-  - adelete(p)           : Delete the piece on 'p', same as areplace(p,'')
-  - ahide(p)             : Hide square 'p'
-  - ahideAll             : Hide all squares
-  - ashow(p)             : Show square 'p' if hidden
-  - ashowAll             : SHow all hidden squares
-  - aaddTime(n,c)        : Add 'n' milliseconds to 'c'
-  - asetTime(n,c)        : Set time of 'c' as 'n'
-  - aaddEnPassant(p1,p2) : Add 'p1' as the en passant square of piece on 'p2'
-  - adelEnPassant(p1,p2) : Delete (all) matching en passant squares on 'p1' of piece on 'p2'
-  - aclrEnPassant(p)     : Delete all en passant squares of piece on 'p'
-  - asetDir(c,d)         : Set direction of color 'c' as 'd'
-  - arevertDir(c)        : Change the direction of 'c' back to normal
-  ```
-
-  #### Operators
-  ```
-  - o+(n1,n2)    : Output 'n1' + 'n2'
-  - o-(n1,n2)    : Output 'n1' - 'n2'
-  - o*(n1,n2)    : Output 'n1' * 'n2'
-  - o/(n1,n2)    : Output 'n1' / 'n2'
-  - o^(n1,n2)    : Output 'n1' ^ 'n2'
-  - o%(n1,n2)    : Output 'n1' % 'n2'  
-  - olg(n1,n2)   : Output log of 'n2' with base 'n1'
-  - oranI(n1,n2) : A random integer between 'n1' and 'n2'
-  - oranD(n1,n1) : A random decimal number between 'n1' and 'n2'
-  - oabs(n)      : Absolute value of 'n'
-  - ornd(n1,n2)  : Round 'n1' to the nearest 'n2' (default n2 = 1 if not stated)
-  - oflr(n1,n2)  : Floor of 'n1' with precision 'n2' (default n2 = 1 if not stated)
-  - oceil(n1,n2) : Ceiling of 'n1' with precision 'n2' (default n2 = 1 if not stated)
-  - osin(n)      : Output $\sin(n)$
-  - ocos(n)      : Output $\cos(n)$
-  - otan(n)      : Output $\tan(n)$
-  - oasin(n)     : Output $\sin^{-1}(n)$
-  - oacos(n)     : Output $\cos^{-1}(n)$
-  - oatan(n)     : Output $\tan^{-1}(n)$
-  ```
-
-  #### Logic
-  ```
-  - l&(b1,b2)    : 'b1' and 'b2'
-  - l|(b1,b2)    : 'b1' or 'b2'
-  - l!(b)        : Not 'b'
-  - l^(b1,b2)    : 'b1' xor 'b2'
-  - l=(v1,v2)    : 'v1' equals 'v2' ?
-  - l~(v1,v2)    : 'v1' equals 'v2' ? (case insensitive)
-  - l>(n1,n2)    : 'n1' > 'n2' ?
-  - l<(n1,n2)    : 'n1' < 'n2' ?
-  - l>=(n1,n2)   : 'n1' >= 'n2' ?
-  - l<=(n1,n2)   : 'n1' <= 'n2' ?
-  ```
-
-  #### Repeat
-  ```
-  - r(n){...} : Repeat ... 'n' times
-  - rforever{...} : Repeat ... forever (until game ends)
-  - runtil(b){...} : Repeat ... until 'b' is true
-  - rwhile(b){...} : Repeat ... while 'b' is true
-  - rforEach(a,v){...} : For each item in 'a', repeat once, with 'v' being the number of times repeated (1,2,...)
-  ```
-
-  #### Conditions
-  ```
-  - ci(b){...}  : If 'b' then ...
-  - ce{...}     : Else ...
-  - cei(b){...} : Else if 'b' then ... 
-  ```
-  
-  #### Variables
-  ```
-  - $createVar(s) : Create a variable with name s
-  - $varSet(s,v)  : Set variable with name s to v
-  - $var(s)       : Get variable with name s, if does not exist, returns null
-  ```
-
-  #### User
-  ```
-  - @promptNew(s)        : Create a prompt with id s to be used any time (type = "text", content = "", visibility = "private") (types: "text","options","tip","note","warn","error")
-  - @promptSet(s1,s2,s3) : Set property s2 of prompt with id s1 to s3
-  - @prompt(s,c)         : Prompt color c with prompt with id s
-  - @promptResp(s)       : Get prompt response with id s, if does not exist, returns null
-  - @promptHide(s,c)     : Hide prompt with id s from color c
-  - @promptHideAll(s)    : Hide prompt with id s from all users
-  - @promptDel(s)        : Delete prompt with id s
-  ```
 
 ### 4. Drag & Drop Editor code plan:
   1. Use `initWorkspace()` to add all the blocks to the panel.

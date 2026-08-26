@@ -70,6 +70,11 @@ function initHorizontalResizer() {
     });
 
     const adjustInitialBounds = () => {
+        if (window.innerWidth <= 900) {
+            leftPanel.style.width = '';
+            return;
+        }
+
         const { minWidth, maxWidth } = getWidthBounds();
         let currentWidth = leftPanel.getBoundingClientRect().width || (window.innerWidth * 0.33);
         if (currentWidth < minWidth) currentWidth = minWidth;
@@ -79,6 +84,9 @@ function initHorizontalResizer() {
 
     adjustInitialBounds();
     window.addEventListener("resize", adjustInitialBounds);
+
+    const mobileBreakpoint = window.matchMedia('(max-width: 900px)');
+    mobileBreakpoint.addEventListener('change', adjustInitialBounds);
 }
 
 function initVerticalResizer() {

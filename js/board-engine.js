@@ -15,6 +15,25 @@ async function setupAnalysisBoard() {
 import { loadRules, triggerEvent, initRuleContext, getRuleContext } from './rule-engine.js';
 import { sendMove } from './online.js';
 
+const moveSound = new Audio('assets/audio/move.wav');
+const captureSound = new Audio('assets/audio/capture.wav');
+
+function playSound(type) {
+    let sound;
+    switch (type) {
+        case 'move':
+            sound = moveSound;
+            break;
+        case 'capture':
+            sound = captureSound;
+            break;
+        default:
+            return;
+    }
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+}
+
 // Automatically trigger setup when this file runs
 setupAnalysisBoard();
 
@@ -833,7 +852,7 @@ function movePieceTo(oldCol, oldRow, newCol, newRow, boardState, type, isEnPassa
             return !captured || sameCol ;
         });
     }
-    // console.log(enPassantSquares);
+    
     return boardState;
 }
 
@@ -915,35 +934,62 @@ function animatePieceMovement(oldCol, oldRow, newCol, newRow, pgn, container, op
     requestAnimationFrame(step);
 }
 
+function updateBoardSize(container) {
+    const board = container._boardElements;
+    if (!board) return;
+
+    const rect = container.getBoundingClientRect();
+    const containerSize = Math.min(rect.width, rect.height);
+    const safeSize = containerSize > 10 ? containerSize : 400;
+    const cellSize = Math.floor(safeSize / Math.max(cols, rows));
+    const boardWidth = cellSize * cols;
+    const boardHeight = cellSize * rows;
+
+    board.grid.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+    board.grid.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+    board.grid.style.width = `${boardWidth}px`;
+    board.grid.style.height = `${boardHeight}px`;
+}
+
 // Draws custom chess board grid based on PGN
 function drawBoard(pgn, container, options = {}) {
+    const spinner = document.getElementById('board-spinner');
+    if (spinner) spinner.classList.add('active');
+
     container.innerHTML = "";
 
     const boardGrid = document.createElement("div");
-    const containerRect = container.getBoundingClientRect();
-    const containerSize = Math.min(containerRect.width, containerRect.height);
-    const safeSize = containerSize > 10 ? containerSize : 400;
-    const cellSize = Math.floor(safeSize / Math.max(cols, rows));
+    const wrapper = document.createElement('div');
 
-    boardGrid.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
-    boardGrid.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
-    boardGrid.style.width = (cellSize * cols) + 'px';
-    boardGrid.style.height = (cellSize * rows) + 'px';
-    boardGrid.style.gap = '0';
-    boardGrid.style.margin = 'auto';
-
+    boardGrid.style.cssText = `
+        display: grid;
+        gap: 0;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    `;
     boardGrid.className = "chess-grid";
     boardGrid.style.setProperty('--cols', cols);
     boardGrid.style.setProperty('--rows', rows);
-    boardGrid.style.border = "2px dashed #f96800";
+
+    wrapper.style.cssText = `
+        border: 2px dashed #f96800;
+        display: inline-block;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        max-width: 100%;
+    `;
+    
+    wrapper.appendChild(boardGrid);
+    container._boardElements = { grid: boardGrid, wrapper };
     
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const square = document.createElement("div");
             square.dataset.row = r;
             square.dataset.col = c;
-            square.style.width = cellSize + 'px';
-            square.style.height = cellSize + 'px';
             square.id = `c${c}r${r}`;
 
             const isLight = (r + c) % 2 === 0;
@@ -982,6 +1028,7 @@ function drawBoard(pgn, container, options = {}) {
                         const moveType = allMoveTypes.some(m => m == 'capture' || m == 'enpassant') ? 'capture' : 'move';
                         // console.log(moveType, allMoveTypes);
                         addMove(oldCol, oldRow, currentCol, currentRow, oldPieceToken, moveType);
+                        playSound(moveType === 'capture' ? 'capture' : 'move');
                         
                         // En Passant squares
                         targetMoves.forEach(t => {
@@ -1159,7 +1206,9 @@ function drawBoard(pgn, container, options = {}) {
             boardGrid.appendChild(square);
         }
     }
-    container.appendChild(boardGrid);
+    container.appendChild(wrapper);
+    updateBoardSize(container);
+    if (spinner) spinner.classList.remove('active');
 }
 
 // Draws board and checks logic
@@ -1225,6 +1274,25 @@ function boardLogic(pgn, container, options = {}) {
     }
 
     drawBoard(pgn, container, options);
+
+    if (container._resizeObserver) {
+        container._resizeObserver.disconnect();
+    }
+    if (container._boardResizeHandler) {
+        window.removeEventListener('resize', container._boardResizeHandler);
+    }
+
+    const resizeBoard = () => {
+        updateBoardSize(container);
+    };
+    const observer = new ResizeObserver(() => {
+        resizeBoard();
+    });
+
+    observer.observe(container);
+    container._resizeObserver = observer;
+    container._boardResizeHandler = resizeBoard;
+    window.addEventListener('resize', resizeBoard);
 }
 
 window.boardLogic = boardLogic;

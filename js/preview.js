@@ -72,7 +72,7 @@ const VARIANT_DATABASE = [
         author: "AllenBB314",
         shortDesc: "idk :)",
         longDesc: "idk :)",
-        icon: "assets/images/icons/pieces/white/P.svg",
+        icon: "assets/images/pieces/simplicity/P.svg",
         pgn: `
         [Position "y:P,y:1,y:2,y:3,y:4,1/6/6/6/6/1,r:4,r:3,r:2,r:1,r:P"]
         [PositionDetails "'dim=6x6';'rbyg=true'"]
@@ -83,8 +83,8 @@ const VARIANT_DATABASE = [
         category: "classic",
         title: "Rule Test",
         author: "AllenBB314",
-        shortDesc: "idk :)",
-        longDesc: "idk :)",
+        shortDesc: "red should win in 3 moves",
+        longDesc: "~turn{ci(l=(3,gmove)){awin('r')}};",
         icon: "assets/images/icons/poly7.svg",
         pgn: `
         [Position "y:P,y:1,y:2,y:3,y:4,1/6/6/6/6/1,r:4,r:3,r:2,r:1,r:P"]
